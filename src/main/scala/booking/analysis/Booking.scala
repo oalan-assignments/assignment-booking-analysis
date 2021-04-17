@@ -36,13 +36,13 @@ object Booking {
         p("age").numOpt.map(_.intValue()),
         p("weight").num.intValue()
       ))
-      val flights: Seq[Flight] = productsList.arr.map(p => Flight(
-        p("bookingStatus").str,
-        p("flight")("marketingAirline").str,
-        p("flight")("originAirport").str,
-        p("flight")("destinationAirport").str,
-        p("flight")("departureDate").str,
-        p("flight")("arrivalDate").str
+      val flights: Seq[Flight] = productsList.arr.map(f => Flight(
+        f("bookingStatus").str,
+        f("flight")("marketingAirline").str,
+        f("flight")("originAirport").str,
+        f("flight")("destinationAirport").str,
+        f("flight")("departureDate").str,
+        f("flight")("arrivalDate").str
       ))
       Booking(timestamp, passengers, flights)
     }
