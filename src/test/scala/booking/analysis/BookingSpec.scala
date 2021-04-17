@@ -1,0 +1,154 @@
+package booking.analysis.input
+
+import org.scalatest._
+import org.scalatest.flatspec._
+import matchers.should._
+
+class BookingSpec extends AnyFlatSpec with Matchers  {
+
+  val jsonLine =
+    """{
+      |  "timestamp": "2019-03-17T13:47:26.005Z",
+      |  "event": {
+      |    "DataElement": {
+      |      "travelrecord": {
+      |        "creationDate": "2019-03-17T13:47:00Z",
+      |        "purgeDateAmd": "2019-07-21T00:00:00Z",
+      |        "lastEotDate": "2019-03-17T13:47:00Z",
+      |        "envelopNumber": 0,
+      |        "nbPassengers": 1,
+      |        "isMarketingBlockspace": false,
+      |        "isTechnicalLastUpdater": false,
+      |        "attributeType": "OAS",
+      |        "passengersList": [
+      |          {
+      |            "age": 18,
+      |            "uci": "20062C080003A785",
+      |            "passengerType": "ADT",
+      |            "tattoo": 1,
+      |            "weight": 22,
+      |            "category": "P3"
+      |          }
+      |        ],
+      |        "productsList": [
+      |          {
+      |            "type": "ns2:Segment",
+      |            "tattoo": "2",
+      |            "bookingStatus": "CONFIRMED",
+      |            "bookingClass": "N",
+      |            "transportClass": "M",
+      |            "aircraftType": "77W",
+      |            "nbPassengers": "1",
+      |            "yieldOrigin": "TLS",
+      |            "yieldDestination": "RUN",
+      |            "yieldTripOrigin": "TLS",
+      |            "yieldTripDestination": "RUN",
+      |            "yieldPointOfCommencement": "FR",
+      |            "flight": {
+      |              "marketingAirline": "AF",
+      |              "marketingFlightNumber": "644",
+      |              "originAirport": "ORY",
+      |              "originTerminal": "3",
+      |              "destinationAirport": "RUN",
+      |              "departureDate": "2019-05-02T17:50:00Z",
+      |              "arrivalDate": "2019-05-03T06:50:00Z",
+      |              "operatingAirline": "AF",
+      |              "operatingFlightNumber": "644"
+      |            },
+      |            "journeyInTattoo": "1"
+      |          },
+      |          {
+      |            "type": "ns2:Segment",
+      |            "tattoo": "4",
+      |            "bookingStatus": "CONFIRMED",
+      |            "bookingClass": "L",
+      |            "transportClass": "Y",
+      |            "aircraftType": "320",
+      |            "nbPassengers": "1",
+      |            "yieldOrigin": "RUN",
+      |            "yieldDestination": "TLS",
+      |            "yieldTripOrigin": "RUN",
+      |            "yieldTripDestination": "TLS",
+      |            "yieldPointOfCommencement": "FR",
+      |            "flight": {
+      |              "marketingAirline": "AF",
+      |              "marketingFlightNumber": "6144",
+      |              "originAirport": "ORY",
+      |              "originTerminal": "1",
+      |              "destinationAirport": "TLS",
+      |              "departureDate": "2019-07-17T20:50:00Z",
+      |              "arrivalDate": "2019-07-17T22:05:00Z",
+      |              "operatingAirline": "AF",
+      |              "operatingFlightNumber": "6144"
+      |            },
+      |            "journeyInTattoo": "3"
+      |          },
+      |          {
+      |            "type": "ns2:Segment",
+      |            "tattoo": "1",
+      |            "bookingStatus": "CONFIRMED",
+      |            "bookingClass": "L",
+      |            "transportClass": "Y",
+      |            "aircraftType": "321",
+      |            "nbPassengers": "1",
+      |            "yieldOrigin": "TLS",
+      |            "yieldDestination": "RUN",
+      |            "yieldTripOrigin": "TLS",
+      |            "yieldTripDestination": "RUN",
+      |            "yieldPointOfCommencement": "FR",
+      |            "flight": {
+      |              "marketingAirline": "AF",
+      |              "marketingFlightNumber": "6127",
+      |              "originAirport": "TLS",
+      |              "destinationAirport": "ORY",
+      |              "destinationTerminal": "1",
+      |              "departureDate": "2019-05-02T14:50:00Z",
+      |              "arrivalDate": "2019-05-02T16:10:00Z",
+      |              "operatingAirline": "AF",
+      |              "operatingFlightNumber": "6127"
+      |            },
+      |            "journeyOutTattoo": "2"
+      |          },
+      |          {
+      |            "type": "ns2:Segment",
+      |            "tattoo": "3",
+      |            "bookingStatus": "CONFIRMED",
+      |            "bookingClass": "N",
+      |            "transportClass": "M",
+      |            "aircraftType": "77W",
+      |            "nbPassengers": "1",
+      |            "yieldOrigin": "RUN",
+      |            "yieldDestination": "TLS",
+      |            "yieldTripOrigin": "RUN",
+      |            "yieldTripDestination": "TLS",
+      |            "yieldPointOfCommencement": "FR",
+      |            "flight": {
+      |              "marketingAirline": "AF",
+      |              "marketingFlightNumber": "645",
+      |              "originAirport": "RUN",
+      |              "destinationAirport": "ORY",
+      |              "destinationTerminal": "3",
+      |              "departureDate": "2019-07-17T09:05:00Z",
+      |              "arrivalDate": "2019-07-17T18:15:00Z",
+      |              "operatingAirline": "AF",
+      |              "operatingFlightNumber": "645"
+      |            },
+      |            "journeyOutTattoo": "4"
+      |          }
+      |        ]
+      |      }
+      |    }
+      |  }
+      |}
+      |
+      |""".stripMargin
+
+  "Booking json line" should "be parsed correctly" in {
+    val booking = ujson.read(jsonLine)
+
+//    booking.event.dataElement.travelRecord.nbPassengers shouldBe 1
+
+  }
+
+
+}
