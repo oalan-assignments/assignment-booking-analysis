@@ -1,8 +1,7 @@
-package booking.analysis.input
+package booking.analysis
 
-import org.scalatest._
 import org.scalatest.flatspec._
-import matchers.should._
+import org.scalatest.matchers.should._
 
 class BookingSpec extends AnyFlatSpec with Matchers  {
 
@@ -144,9 +143,10 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
       |""".stripMargin
 
   "Booking json line" should "be parsed correctly" in {
-    val booking = ujson.read(jsonLine)
-
-//    booking.event.dataElement.travelRecord.nbPassengers shouldBe 1
+    val booking = Booking.fromJson(jsonLine).get
+    booking.timestamp shouldBe "2019-03-17T13:47:26.005Z"
+    booking.passengers.size shouldBe 1
+    booking.passengers(0).age.get shouldBe 18
 
   }
 
