@@ -2,6 +2,7 @@ package booking.analysis
 
 import booking.analysis.Booking.{Flight, Passenger}
 import org.apache.log4j.Logger
+import ujson.Value
 
 import scala.util.{Failure, Success, Try}
 
@@ -33,7 +34,7 @@ object Booking {
       val passengers: Seq[Passenger] = passengersList.arr.map(p => Passenger(
         p("uci").str,
         p("passengerType").str,
-        p("age").numOpt.map(_.intValue()),
+        extractAgeIfExists(p),
         p("weight").num.intValue()
       ))
       val flights: Seq[Flight] = productsList.arr.map(f => Flight(
@@ -52,6 +53,14 @@ object Booking {
         logger.error(s"Error while reading a json booking line: $line", exception)
         None
       }
+    }
+  }
+
+  private def extractAgeIfExists(value: Value): Option[Int] = {
+    val attempt = Try(value("age").numOpt.map(_.intValue()))
+    attempt match {
+      case Success(result) => result
+      case Failure(_) => None
     }
   }
 }
