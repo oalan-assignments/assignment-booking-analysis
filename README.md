@@ -8,6 +8,12 @@
 
 ## Built With
 
+* [Spark 3.1.1](https://spark.apache.org/releases/spark-release-3-1-1.html)
+* [Scala 2.12.4](https://www.scala-lang.org/download/2.12.4.html)
+* [Scala Arm 2.0](https://github.com/jsuereth/scala-arm): Scala brought `automated resource management` with v2.13. It 
+is not possible to use scala 2.13 with Spark. Hence, ARM library used.
+* [upickle 0.9.5](https://github.com/com-lihaoyi/upickle): for json line parsing
+
 ## Design
 
 ### Translated Requirements
@@ -40,8 +46,10 @@
 
 ### Data Investigation
 
-TODO:
-* Design choices (with pros & cons)
-* Data flow
+#### Design
+**TODO: document data flow**
+
+#### Design Choices
+
 
 ## Future Improvements
