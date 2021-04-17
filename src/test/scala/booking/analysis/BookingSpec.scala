@@ -25,4 +25,9 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
     booking.passengers.size shouldBe 8
     booking.passengers(0).age shouldBe None
   }
+
+  "Booking json with missing mandatory lines" should "be processed but should yield empty Booking" in {
+    val invalidBooking = os.read(os.pwd/"src"/"test"/"resources"/"single-event-with-missing-fields.json")
+    val booking = Booking.fromJson(invalidBooking) shouldBe None
+  }
 }
