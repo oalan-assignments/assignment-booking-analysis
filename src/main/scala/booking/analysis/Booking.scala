@@ -13,7 +13,7 @@ object Booking {
   val logger = Logger.getLogger(Booking.getClass)
 
   case class Passenger(uci: String,
-                       `type`: String,
+                       category: String,
                        age: Option[Int],
                        weight: Int)
 
