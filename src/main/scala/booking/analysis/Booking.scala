@@ -44,7 +44,7 @@ object Booking {
         f("flight")("destinationAirport").str,
         f("flight")("departureDate").str,
         f("flight")("arrivalDate").str
-      ))
+      )).sortBy(_.departureDate)
       Booking(timestamp, passengers, flights)
     }
     parseAttempt match {
@@ -54,6 +54,10 @@ object Booking {
         None
       }
     }
+  }
+
+  def containsKlmFlight(booking: Booking): Boolean = {
+    booking.flights.filter(_.airline == "KL").size > 0
   }
 
   private def extractAgeIfExists(value: Value): Option[Int] = {
