@@ -37,6 +37,7 @@ object Booking {
         extractAgeIfExists(p),
         p("weight").num.intValue()
       ))
+      assert(passengers.size > 0, "Passenger information can not be empty")
       val flights: Seq[Flight] = productsList.arr.map(f => Flight(
         f("bookingStatus").str,
         f("flight")("marketingAirline").str,
@@ -45,6 +46,7 @@ object Booking {
         f("flight")("departureDate").str,
         f("flight")("arrivalDate").str
       )).sortBy(_.departureDate)
+      assert(flights.size > 0, "Flight information can not be empty")
       Booking(timestamp, passengers, flights)
     }
     parseAttempt match {
