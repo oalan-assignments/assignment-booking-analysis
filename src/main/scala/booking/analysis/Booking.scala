@@ -67,6 +67,13 @@ object Booking {
     booking.flights.last.status == "CONFIRMED"
   }
 
+  def isOriginatingFromNetherlands(booking: Booking, airportCountryLookup: Map[String, String]) = {
+    airportCountryLookup.get(booking.flights.head.origin) match {
+      case Some(country) => country == "Netherlands"
+      case _ => false
+    }
+  }
+
   private def extractAgeIfExists(value: Value): Option[Int] = {
     val attempt = Try(value("age").numOpt.map(_.intValue()))
     attempt match {

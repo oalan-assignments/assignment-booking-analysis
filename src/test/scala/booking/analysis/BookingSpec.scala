@@ -1,6 +1,6 @@
 package booking.analysis
 
-import booking.analysis.Booking.{Flight, containsKlmFlight, isConfirmed}
+import booking.analysis.Booking.{Flight, containsKlmFlight, isConfirmed, isOriginatingFromNetherlands}
 import org.scalatest.flatspec._
 import org.scalatest.matchers.should._
 
@@ -55,6 +55,11 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
   "Is confirmed" should "yield correct result" in {
     isConfirmed(confirmedKlmFlight) shouldBe true
     isConfirmed(unconfirmedNonKlmFlight) shouldBe false
+  }
+
+  "Is originating from the Netherlands" should "yield correct result" in {
+    isOriginatingFromNetherlands(confirmedKlmFlight, Map("AMS" -> "Netherlands")) shouldBe true
+    isOriginatingFromNetherlands(unconfirmedNonKlmFlight, Map("AMS" -> "Netherlands", "CDG" -> "FRANCE")) shouldBe false
   }
 
 }
