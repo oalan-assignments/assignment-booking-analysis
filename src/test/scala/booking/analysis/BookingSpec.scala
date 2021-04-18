@@ -1,10 +1,18 @@
 package booking.analysis
 
-import booking.analysis.Booking.containsKlmFlight
+import booking.analysis.Booking.{Flight, containsKlmFlight, isConfirmed}
 import org.scalatest.flatspec._
 import org.scalatest.matchers.should._
 
 class BookingSpec extends AnyFlatSpec with Matchers  {
+
+  val confirmedKlmFlight = Booking("2019-03-17T13:47:40.317Z", Seq.empty, Seq(
+    Flight("CONFIRMED", "KL", "AMS", "DXB", "2019-03-17T17:10:00Z", "2019-03-18T02:55:00Z"),
+    Flight("CONFIRMED", "DL", "DXB", "AMS", "2019-03-29T01:55:00Z", "2019-03-29T06:20:00Z")))
+
+  val unconfirmedNonKlmFlight = Booking("2019-03-17T13:47:25.974Z", Seq.empty, Seq(
+    Flight("CONFIRMED", "AF", "CDG", "BUD", "2019-03-14T20:55:00Z", "2019-03-14T23:05:00Z"),
+    Flight("CANCELLED", "AF", "BUD", "CDG", "2019-03-17T16:25:00Z", "2019-03-17T18:45:00Z")))
 
   "Booking json line" should "be parsed correctly" in {
     val jsonWithAgeInformation = os.read(os.pwd/"src"/"test"/"resources"/ "event-with-age.json")
@@ -28,26 +36,25 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
   }
 
   "Booking json line" should "be parsed correctly even there is no age information" in {
-    val jsonWithoutAgeInformation = os.read(os.pwd/"src"/"test"/"resources"/ "event-without-age.json")
+    val jsonWithoutAgeInformation = os.read(os.pwd/"src"/"test"/"resources"/"event-without-age.json")
     val booking = Booking.fromJson(jsonWithoutAgeInformation).get
     booking.passengers.size shouldBe 8
     booking.passengers(0).age shouldBe None
   }
 
   "Booking json with missing mandatory lines" should "be processed but should yield empty Booking" in {
-    val invalidBooking = os.read(os.pwd/"src"/"test"/"resources"/ "event-with-missing-fields.json")
+    val invalidBooking = os.read(os.pwd/"src"/"test"/"resources"/"event-with-missing-fields.json")
     Booking.fromJson(invalidBooking) shouldBe None
   }
 
   "Contains any KLM flight" should "yield correct result" in {
-    val klmBookingEvent = os.read(os.pwd/"src"/"test"/"resources"/ "event-contains-klm-flight.json")
-    val booking = Booking.fromJson(klmBookingEvent).get
-    containsKlmFlight(booking) shouldBe true
+    containsKlmFlight(confirmedKlmFlight) shouldBe true
+    containsKlmFlight(unconfirmedNonKlmFlight) shouldBe false
+  }
 
-
-    val nonKlmBookingEvent = os.read(os.pwd/"src"/"test"/"resources"/ "event-non-klm-unconfirmed.json")
-    val nonKlmBooking = Booking.fromJson(nonKlmBookingEvent).get
-    containsKlmFlight(nonKlmBooking) shouldBe false
+  "Is confirmed" should "yield correct result" in {
+    isConfirmed(confirmedKlmFlight) shouldBe true
+    isConfirmed(unconfirmedNonKlmFlight) shouldBe false
   }
 
 }
