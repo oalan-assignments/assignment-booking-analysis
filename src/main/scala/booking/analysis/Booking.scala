@@ -62,6 +62,11 @@ object Booking {
     booking.flights.filter(_.airline == "KL").size > 0
   }
 
+
+  def isConfirmed(booking: Booking): Boolean = {
+    booking.flights.last.status == "CONFIRMED"
+  }
+
   private def extractAgeIfExists(value: Value): Option[Int] = {
     val attempt = Try(value("age").numOpt.map(_.intValue()))
     attempt match {
