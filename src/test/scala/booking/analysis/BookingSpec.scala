@@ -1,6 +1,6 @@
 package booking.analysis
 
-import booking.analysis.Booking.{Flight, flewInPeriod, isConfirmed}
+import booking.analysis.Booking.{Flight, flewInPeriod, isConfirmed, isEligibleForAnalysis, isKlmFlightOriginatingFromNetherlands}
 import org.scalatest.flatspec._
 import org.scalatest.matchers.should._
 
@@ -47,26 +47,31 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
     Booking.fromJson(invalidBooking) shouldBe None
   }
 
+  "Is confirmed" should "yield correct result" in {
+    isConfirmed(confirmedKlmFlight) shouldBe true
+    isConfirmed(unconfirmedNonKlmFlight) shouldBe false
+  }
+
   "Checking whether if flight departure is in period" should "yield correct result" in {
     val flight = Flight("CONFIRMED", "AF", "CDG", "BUD", "2019-03-14T20:55:00Z", "2019-03-14T23:05:00Z")
     flewInPeriod(flight, "2019-03-14T20:55:00Z", "2019-03-14T20:55:00Z") shouldBe true
     flewInPeriod(flight, "2019-03-15T20:55:00Z", "2019-03-16T20:55:00Z") shouldBe false
     flewInPeriod(flight, "2018-03-14T20:55:00Z", "2019-03-14T20:54:00Z") shouldBe false
   }
-  //  "Contains any KLM flight" should "yield correct result" in {
-  //    containsKlmFlight(confirmedKlmFlight) shouldBe true
-  //    containsKlmFlight(unconfirmedNonKlmFlight) shouldBe false
-  //  }
 
 
-  "Is confirmed" should "yield correct result" in {
-    isConfirmed(confirmedKlmFlight) shouldBe true
-    isConfirmed(unconfirmedNonKlmFlight) shouldBe false
+  "Is a KLM flight originating from the Netherlands" should "yield correct result" in {
+    isKlmFlightOriginatingFromNetherlands(Flight("CONFIRMED", "KL", "AMS", "DXB", "2019-03-17T17:10:00Z", "2019-03-18T02:55:00Z"),
+      Map("AMS" -> "Netherlands")) shouldBe true
+    isKlmFlightOriginatingFromNetherlands(Flight("CONFIRMED", "AF", "CDG", "BUD", "2019-03-14T20:55:00Z", "2019-03-14T23:05:00Z"),
+      Map("AMS" -> "Netherlands", "CDG" -> "FRANCE")) shouldBe false
   }
 
-//  "Is originating from the Netherlands" should "yield correct result" in {
-//    isOriginatingFromNetherlands(confirmedKlmFlight, Map("AMS" -> "Netherlands")) shouldBe true
-//    isOriginatingFromNetherlands(unconfirmedNonKlmFlight, Map("AMS" -> "Netherlands", "CDG" -> "FRANCE")) shouldBe false
-//  }
+  "Is eligible for analysis check" should "yield correct result" in {
+    val map = Map("AMS" -> "Netherlands", "CDG" -> "FRANCE")
+    isEligibleForAnalysis(confirmedKlmFlight, "2019-03-16T17:10:00Z", "2019-03-20T02:55:00Z", map) shouldBe true
+    isEligibleForAnalysis(confirmedKlmFlight, "2019-03-16T17:10:00Z", "2019-03-170T02:55:00Z", map) shouldBe false
+    isEligibleForAnalysis(unconfirmedNonKlmFlight, "1980-03-16T17:10:00Z", "2020-03-170T02:55:00Z", map) shouldBe false
+  }
 
 }
