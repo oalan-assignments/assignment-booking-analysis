@@ -1,0 +1,1 @@
+./build-and-run.sh 2010-01-01 2022-01-01 data/bookings/booking.json data/airports/airports.dat
