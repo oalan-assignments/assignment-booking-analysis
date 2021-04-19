@@ -7,7 +7,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.7" % "test",
   "com.jsuereth" % "scala-arm_2.12" % "2.0",
   "com.lihaoyi" %% "upickle" % "0.9.5",
-  "com.lihaoyi" %% "os-lib" % "0.7.3"
+  "com.lihaoyi" %% "os-lib" % "0.7.3",
 )
 
 parallelExecution in Test := false
