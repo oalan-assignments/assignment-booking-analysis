@@ -35,20 +35,21 @@ object Bookings {
   }
 
   //TODO: Consider using another case class rather than retrofitting to Booking
+  case class FlightWithPassengersData(flight: Flight, passengers: Seq[Passenger])
   def flattenFlights(spark: SparkSession, bookings: Dataset[Booking], airportsToCountry: Map[String, String]) = {
     import spark.implicits._
     bookings.flatMap(b => {
       val expanded = b.flights.filter(f => Booking.isKlmFlightOriginatingFromNetherlands(f, airportsToCountry))
-      expanded.map(f => Booking(b.timestamp, b.passengers, Seq(f)))
+      expanded.map(f => FlightWithPassengersData(f, b.passengers))
     })
   }
 
   def toAnalysisDataSet(spark: SparkSession,
-                        bookings: Dataset[Booking],
+                        bookings: Dataset[FlightWithPassengersData],
                         airportsToCountry: Map[String, String]): Dataset[(AnalysisKey, AnalysisData)] = {
     import spark.implicits._
     bookings
-      .groupByKey(_.flights.head)
+      .groupByKey(_.flight)
       .mapValues(booking => booking.passengers)
       .mapGroups((flight, passengers) => {
         val uniquePassengers = passengers.flatten.toList.distinct
@@ -65,7 +66,6 @@ object Bookings {
                        avgWeight: Double,
                        avgAge: Option[Double])
 
-  //TODO: Create final report with avg weight and avg age
   def aggregateToFinalReport(spark: SparkSession,
                              analysisSet: Dataset[(AnalysisKey, AnalysisData)]): Dataset[ReportRow] = {
     import spark.implicits._
