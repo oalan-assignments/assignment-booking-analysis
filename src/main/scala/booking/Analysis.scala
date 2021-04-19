@@ -39,11 +39,7 @@ object Analysis {
     val eligibleBookings = Bookings.eligibleForAnalysis(bookings, startUtc, endUtc, broadCastAirports.value)
     val flattenedFlights = Bookings.flattenFlights(spark, eligibleBookings, broadCastAirports.value)
     val analysisSet = Bookings.toAnalysisDataSet(spark, flattenedFlights, broadCastAirports.value)
-    import spark.implicits._
     val finalResult = Bookings.aggregateToFinalReport(spark, analysisSet)
-      .rdd
-      .sortBy(_._2.noOfPassengers, false )
-      .toDS()
     finalResult.show(finalResult.count().toInt, false)
     spark.stop()
   }

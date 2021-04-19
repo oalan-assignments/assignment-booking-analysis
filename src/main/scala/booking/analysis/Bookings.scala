@@ -56,9 +56,18 @@ object Bookings {
       })
   }
 
+  case class ReportRow(country: String,
+                       season: String,
+                       weekday: String,
+                       noOfPassengers: Int,
+                       adults: Int,
+                       children: Int,
+                       avgWeight: Double,
+                       avgAge: Option[Double])
+
   //TODO: Create final report with avg weight and avg age
   def aggregateToFinalReport(spark: SparkSession,
-                             analysisSet: Dataset[(AnalysisKey, AnalysisData)]): Dataset[(AnalysisKey, AnalysisData)] = {
+                             analysisSet: Dataset[(AnalysisKey, AnalysisData)]): Dataset[ReportRow] = {
     import spark.implicits._
     analysisSet
       .rdd
@@ -69,7 +78,16 @@ object Bookings {
         d1.totalWeight + d2.totalWeight,
         d1.ageSum + d2.ageSum,
         d1.noOfPassengers + d2.noOfPassengers
-      )).toDS()
+      ))
+      .map(pair => {
+        val key = pair._1
+        val data = pair._2
+        val avgAge: Option[Double] = if (data.noOfPassengersWithAgeInfo > 0) Some(data.ageSum/data.noOfPassengersWithAgeInfo) else None
+        ReportRow(key.country, key.season, key.weekday,
+          data.noOfPassengers, data.adults, data.children, data.totalWeight/data.noOfPassengers, avgAge)
+      })
+      .sortBy(_.noOfPassengers, false )
+      .toDS()
   }
 
 
