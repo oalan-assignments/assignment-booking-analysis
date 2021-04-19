@@ -34,7 +34,6 @@ object Bookings {
         airportsToCountry))
   }
 
-  //TODO: Consider using another case class rather than retrofitting to Booking
   case class FlightWithPassengersData(flight: Flight, passengers: Seq[Passenger])
   def flattenFlights(spark: SparkSession, bookings: Dataset[Booking], airportsToCountry: Map[String, String]) = {
     import spark.implicits._
@@ -46,14 +45,15 @@ object Bookings {
 
   def toAnalysisDataSet(spark: SparkSession,
                         bookings: Dataset[FlightWithPassengersData],
-                        airportsToCountry: Map[String, String]): Dataset[(AnalysisKey, AnalysisData)] = {
+                        airportsToCountry: Map[String, String],
+                        airportsToTimezone: Map[String, String]): Dataset[(AnalysisKey, AnalysisData)] = {
     import spark.implicits._
     bookings
       .groupByKey(_.flight)
       .mapValues(booking => booking.passengers)
       .mapGroups((flight, passengers) => {
         val uniquePassengers = passengers.flatten.toList.distinct
-        (flightToAnalysisKey(flight, airportsToCountry), passengersToAnalysisData(uniquePassengers))
+        (flightToAnalysisKey(flight, airportsToCountry, airportsToTimezone), passengersToAnalysisData(uniquePassengers))
       })
   }
 
@@ -92,11 +92,14 @@ object Bookings {
 
 
 
-  private def flightToAnalysisKey(flight: Flight, airportsToCountry: Map[String, String]): AnalysisKey = {
+  private def flightToAnalysisKey(flight: Flight,
+                                  airportsToCountry: Map[String, String],
+                                  airportsToTimezone: Map[String, String]): AnalysisKey = {
     val seasons = Seq("Winter", "Winter", "Spring", "Spring", "Summer", "Summer",
       "Summer", "Summer", "Fall", "Fall", "Winter", "Winter")
-    //TODO: use timezone broadcast
-    val instant = Instant.parse(flight.departureDate).atZone(ZoneId.of("UTC"))
+    val instant = Instant
+      .parse(flight.departureDate)
+      .atZone(ZoneId.of(airportsToTimezone.get(flight.destination).getOrElse("UTC")))
     val season = seasons(instant.getMonthValue - 1)
     val weekday = instant.getDayOfWeek().toString
     AnalysisKey(airportsToCountry.get(flight.destination).getOrElse("Unknown"), season, weekday)
