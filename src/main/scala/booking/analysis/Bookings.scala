@@ -79,33 +79,36 @@ object Bookings {
         d1.ageSum + d2.ageSum,
         d1.noOfPassengers + d2.noOfPassengers
       ))
-      .map(pair => {
-        val key = pair._1
-        val data = pair._2
-        val avgAge: Option[Double] = if (data.noOfPassengersWithAgeInfo > 0) Some(data.ageSum/data.noOfPassengersWithAgeInfo) else None
-        ReportRow(key.country, key.season, key.weekday,
-          data.noOfPassengers, data.adults, data.children, data.totalWeight/data.noOfPassengers, avgAge)
-      })
-      .sortBy(_.noOfPassengers, false )
+      .map(pair => analysisToReportRow(pair))
+      .sortBy(_.noOfPassengers, false)
       .toDS()
   }
 
 
+  private[analysis] def analysisToReportRow(pair: (AnalysisKey, AnalysisData)): ReportRow = {
+    val key = pair._1
+    val data = pair._2
+    val avgAge: Option[Double] = if (data.noOfPassengersWithAgeInfo > 0) {
+      Some(data.ageSum / data.noOfPassengersWithAgeInfo)
+    } else None
+    ReportRow(key.country, key.season, key.weekday,
+      data.noOfPassengers, data.adults, data.children, data.totalWeight / data.noOfPassengers, avgAge)
+  }
 
-  private def flightToAnalysisKey(flight: Flight,
-                                  airportsToCountry: Map[String, String],
-                                  airportsToTimezone: Map[String, String]): AnalysisKey = {
+  private[analysis] def flightToAnalysisKey(flight: Flight,
+                                            airportsToCountry: Map[String, String],
+                                            airportsToTimezone: Map[String, String]): AnalysisKey = {
     val seasons = Seq("Winter", "Winter", "Spring", "Spring", "Summer", "Summer",
       "Summer", "Summer", "Fall", "Fall", "Winter", "Winter")
     val instant = Instant
       .parse(flight.departureDate)
-      .atZone(ZoneId.of(airportsToTimezone.get(flight.destination).getOrElse("UTC")))
+      .atZone(ZoneId.of(airportsToTimezone.get(flight.origin).getOrElse("UTC")))
     val season = seasons(instant.getMonthValue - 1)
     val weekday = instant.getDayOfWeek().toString
     AnalysisKey(airportsToCountry.get(flight.destination).getOrElse("Unknown"), season, weekday)
   }
 
-  private def passengersToAnalysisData(uniquePassengers: Seq[Passenger]): AnalysisData = {
+  private[analysis] def passengersToAnalysisData(uniquePassengers: Seq[Passenger]): AnalysisData = {
     val noOfPassengers = uniquePassengers.size
     val adults = uniquePassengers.filter(_.category == "ADT").size
     val children = uniquePassengers.filter(_.category == "CHD").size
