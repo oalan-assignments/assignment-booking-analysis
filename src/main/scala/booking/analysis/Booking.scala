@@ -37,7 +37,7 @@ object Booking {
         extractAgeIfExists(p),
         p("weight").num.intValue()
       ))
-      assert(passengers.size > 0, "Passenger information can not be empty")
+      assert(passengers.nonEmpty, "Passenger information can not be empty")
       val flights: Seq[Flight] = productsList.arr.map(f => Flight(
         f("bookingStatus").str,
         f("flight")("marketingAirline").str,
@@ -45,8 +45,9 @@ object Booking {
         f("flight")("destinationAirport").str,
         f("flight")("departureDate").str,
         f("flight")("arrivalDate").str
-      )).sortBy(_.departureDate)
-      assert(flights.size > 0, "Flight information can not be empty")
+      ))
+        .sortBy(_.departureDate)
+      assert(flights.nonEmpty, "Flight information can not be empty")
       Booking(timestamp, passengers, flights)
     }
     parseAttempt match {
@@ -58,18 +59,26 @@ object Booking {
     }
   }
 
-  def containsKlmFlight(booking: Booking): Boolean = {
-    booking.flights.filter(_.airline == "KL").size > 0
-  }
-
-
   def isConfirmed(booking: Booking): Boolean = {
     booking.flights.last.status == "CONFIRMED"
   }
 
-  def isOriginatingFromNetherlands(booking: Booking, airportCountryLookup: Map[String, String]) = {
-    airportCountryLookup.get(booking.flights.head.origin) match {
-      case Some(country) => country == "Netherlands"
+  def isEligibleForAnalysis(booking: Booking,
+                            startUtc: String,
+                            endUtc: String,
+                            airportCountryLookup: Map[String, String]): Boolean = {
+    booking.flights.exists(f =>
+      flewInPeriod(f, startUtc, endUtc) &&
+        isKlmFlightOriginatingFromNetherlands(f, airportCountryLookup))
+  }
+
+  def flewInPeriod(flight: Flight, startUtc: String, endUtc: String): Boolean = {
+    flight.departureDate >= startUtc && flight.departureDate <= endUtc
+  }
+
+  def isKlmFlightOriginatingFromNetherlands(flight: Flight, airportCountryLookup: Map[String, String]): Boolean = {
+    airportCountryLookup.get(flight.origin) match {
+      case Some(country) => country == "Netherlands" && flight.airline == "KL"
       case _ => false
     }
   }

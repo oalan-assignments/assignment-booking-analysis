@@ -1,6 +1,6 @@
 package booking.analysis
 
-import booking.analysis.Booking.{Flight, containsKlmFlight, isConfirmed, isOriginatingFromNetherlands}
+import booking.analysis.Booking.{Flight, flewInPeriod, isConfirmed}
 import org.scalatest.flatspec._
 import org.scalatest.matchers.should._
 
@@ -47,19 +47,26 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
     Booking.fromJson(invalidBooking) shouldBe None
   }
 
-  "Contains any KLM flight" should "yield correct result" in {
-    containsKlmFlight(confirmedKlmFlight) shouldBe true
-    containsKlmFlight(unconfirmedNonKlmFlight) shouldBe false
+  "Checking whether if flight departure is in period" should "yield correct result" in {
+    val flight = Flight("CONFIRMED", "AF", "CDG", "BUD", "2019-03-14T20:55:00Z", "2019-03-14T23:05:00Z")
+    flewInPeriod(flight, "2019-03-14T20:55:00Z", "2019-03-14T20:55:00Z") shouldBe true
+    flewInPeriod(flight, "2019-03-15T20:55:00Z", "2019-03-16T20:55:00Z") shouldBe false
+    flewInPeriod(flight, "2018-03-14T20:55:00Z", "2019-03-14T20:54:00Z") shouldBe false
   }
+  //  "Contains any KLM flight" should "yield correct result" in {
+  //    containsKlmFlight(confirmedKlmFlight) shouldBe true
+  //    containsKlmFlight(unconfirmedNonKlmFlight) shouldBe false
+  //  }
+
 
   "Is confirmed" should "yield correct result" in {
     isConfirmed(confirmedKlmFlight) shouldBe true
     isConfirmed(unconfirmedNonKlmFlight) shouldBe false
   }
 
-  "Is originating from the Netherlands" should "yield correct result" in {
-    isOriginatingFromNetherlands(confirmedKlmFlight, Map("AMS" -> "Netherlands")) shouldBe true
-    isOriginatingFromNetherlands(unconfirmedNonKlmFlight, Map("AMS" -> "Netherlands", "CDG" -> "FRANCE")) shouldBe false
-  }
+//  "Is originating from the Netherlands" should "yield correct result" in {
+//    isOriginatingFromNetherlands(confirmedKlmFlight, Map("AMS" -> "Netherlands")) shouldBe true
+//    isOriginatingFromNetherlands(unconfirmedNonKlmFlight, Map("AMS" -> "Netherlands", "CDG" -> "FRANCE")) shouldBe false
+//  }
 
 }
