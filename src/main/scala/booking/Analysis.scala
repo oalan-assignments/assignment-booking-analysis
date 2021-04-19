@@ -2,7 +2,9 @@ package booking
 
 import java.time.{LocalDate, ZoneId}
 
-import booking.analysis.{Airports, Bookings}
+import booking.analysis.Report
+import booking.analysis.input.Bookings.eligibleForAnalysis
+import booking.analysis.input.{Airports, Bookings}
 import org.apache.log4j.Logger
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
@@ -37,15 +39,9 @@ object Analysis {
 
 
     val bookings = Bookings.load(spark, bookingsFile)
-    val eligibleBookings = Bookings.eligibleForAnalysis(bookings, startUtc, endUtc, broadcastAirportsToCountry.value)
-    val flattenedFlights = Bookings.flattenFlights(spark, eligibleBookings, broadcastAirportsToCountry.value)
-    val analysisSet = Bookings.toAnalysisDataSet(
-      spark,
-      flattenedFlights,
-      broadcastAirportsToCountry.value,
-      broadcastAirportsToTimezone.value)
-    val finalResult = Bookings.aggregateToFinalReport(spark, analysisSet)
-    finalResult.show(finalResult.count().toInt, false)
+    val eligibleBookings = eligibleForAnalysis(bookings, startUtc, endUtc, broadcastAirportsToCountry.value)
+    val report = Report.run(spark, eligibleBookings, broadcastAirportsToCountry, broadcastAirportsToTimezone)
+    report.show(report.count().toInt, false)
     spark.stop()
   }
 }

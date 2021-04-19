@@ -1,4 +1,4 @@
-package booking.analysis
+package booking.analysis.input
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
@@ -15,19 +15,19 @@ object Airports {
       .option("inferSchema", "true")
       .load(path)
       .toDF("id"
-        ,"name"
-        ,"city"
-        ,"country"
-        ,"iata"
-        ,"icao"
-        ,"lat"
-        ,"lon"
-        ,"alt"
-        ,"timezone"
-        ,"dst"
-        ,"tz"
-        ,"airportType"
-        ,"source")
+        , "name"
+        , "city"
+        , "country"
+        , "iata"
+        , "icao"
+        , "lat"
+        , "lon"
+        , "alt"
+        , "timezone"
+        , "dst"
+        , "tz"
+        , "airportType"
+        , "source")
       .select("iata", "country", "tz")
       .filter(col("iata") =!= "\\N")
       .filter(col("tz") =!= "\\N")

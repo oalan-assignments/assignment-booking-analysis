@@ -2,39 +2,31 @@ package booking.analysis
 
 import java.time.{Instant, ZoneId}
 
-import booking.analysis.Booking.{Flight, Passenger, isEligibleForAnalysis}
+import booking.analysis.domain.Booking
+import booking.analysis.domain.Booking.{Flight, Passenger}
+import booking.analysis.input.Bookings.{AnalysisData, AnalysisKey}
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
 
+object Report {
 
-object Bookings {
-
-  case class AnalysisData(noOfPassengers: Int,
-                          adults: Int,
-                          children: Int,
-                          totalWeight: Int,
-                          ageSum: Int,
-                          noOfPassengersWithAgeInfo: Int)
-  case class AnalysisKey(country: String, season: String, weekday: String)
-
-  def load(spark: SparkSession, path: String): Dataset[Booking] = {
-    import spark.implicits._
-    spark.read.textFile(path)
-      .map(Booking.fromJson(_))
-      .filter(_.isDefined).map(_.get)
+  def run(spark: SparkSession,
+          eligibleBookings: Dataset[Booking],
+          broadcastAirportsToCountry: Broadcast[Map[String, String]],
+          broadcastAirportsToTimezone: Broadcast[Map[String, String]]
+         ) = {
+    val flattenedFlights = flattenFlights(spark, eligibleBookings, broadcastAirportsToCountry.value)
+    val analysisSet = toAnalysisDataSet(
+      spark,
+      flattenedFlights,
+      broadcastAirportsToCountry.value,
+      broadcastAirportsToTimezone.value)
+    aggregateToFinalReport(spark, analysisSet)
   }
 
-  def eligibleForAnalysis(bookings: Dataset[Booking],
-                          startUtc: String,
-                          endUtc: String,
-                          airportsToCountry: Map[String, String]) = {
-    bookings
-      .filter(b => isEligibleForAnalysis(b,
-        startUtc,
-        endUtc,
-        airportsToCountry))
-  }
 
   case class FlightWithPassengersData(flight: Flight, passengers: Seq[Passenger])
+
   def flattenFlights(spark: SparkSession, bookings: Dataset[Booking], airportsToCountry: Map[String, String]) = {
     import spark.implicits._
     bookings.flatMap(b => {
@@ -83,7 +75,6 @@ object Bookings {
       .sortBy(_.noOfPassengers, false)
       .toDS()
   }
-
 
   private[analysis] def analysisToReportRow(pair: (AnalysisKey, AnalysisData)): ReportRow = {
     val key = pair._1

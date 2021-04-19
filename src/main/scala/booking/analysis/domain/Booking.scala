@@ -1,6 +1,6 @@
-package booking.analysis
+package booking.analysis.domain
 
-import booking.analysis.Booking.{Flight, Passenger}
+import booking.analysis.domain.Booking.{Flight, Passenger}
 import org.apache.log4j.Logger
 import ujson.Value
 

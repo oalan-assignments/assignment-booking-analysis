@@ -1,11 +1,12 @@
 package booking.analysis
 
-import booking.analysis.Booking.{Flight, Passenger}
-import booking.analysis.Bookings.{AnalysisData, AnalysisKey, ReportRow, analysisToReportRow, passengersToAnalysisData}
+import booking.analysis.Report.{ReportRow, analysisToReportRow, flightToAnalysisKey, passengersToAnalysisData}
+import booking.analysis.domain.Booking.{Flight, Passenger}
+import booking.analysis.input.Bookings._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class BookingsSpec extends AnyFlatSpec with Matchers {
+class ReportSpec extends AnyFlatSpec with Matchers {
 
   "Flight to Analysis Key" should "work as expected" in {
     val departureOnMondayUtc = "2021-04-19T23:00:00Z"
@@ -14,7 +15,7 @@ class BookingsSpec extends AnyFlatSpec with Matchers {
     val airportToCountry = Map("AMS" -> "Netherlands", "BUD" -> "Hungary")
     val airportToTimezone = Map("AMS" -> "Europe/Amsterdam")
 
-    Bookings.flightToAnalysisKey(flight, airportToCountry, airportToTimezone) shouldBe
+    flightToAnalysisKey(flight, airportToCountry, airportToTimezone) shouldBe
       AnalysisKey("Hungary", "Spring", "TUESDAY")
   }
 

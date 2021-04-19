@@ -1,6 +1,6 @@
-package booking.analysis
+package booking.analysis.domain
 
-import booking.analysis.Booking.{Flight, flewInPeriod, isConfirmed, isEligibleForAnalysis, isKlmFlightOriginatingFromNetherlands}
+import booking.analysis.domain.Booking._
 import org.scalatest.flatspec._
 import org.scalatest.matchers.should._
 
