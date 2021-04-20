@@ -11,7 +11,7 @@ sbt -DsparkDependencyScope=provided clean assembly
 
 docker build --rm=true -t booking-analysis .
 
-docker run --env START_DATE=$START_DATE \
-          --env END_DATE=$END_DATE \
-          --env BOOKINGS_DIR=$BOOKINGS_DIR \
+docker run --env START_DATE="$START_DATE" \
+          --env END_DATE="$END_DATE" \
+          --env BOOKINGS_DIR="$BOOKINGS_DIR" \
           booking-analysis

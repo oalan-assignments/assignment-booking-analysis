@@ -10,7 +10,7 @@ case class Booking(timestamp: String, passengers: Seq[Passenger], flights: Seq[F
 
 object Booking {
 
-  val logger = Logger.getLogger(Booking.getClass)
+  private val logger = Logger.getLogger(Booking.getClass)
 
   case class Passenger(uci: String,
                        category: String,
@@ -52,10 +52,9 @@ object Booking {
     }
     parseAttempt match {
       case Success(booking) => Some(booking)
-      case Failure(exception) => {
+      case Failure(exception) =>
         logger.error(s"Error while reading a json booking line: $line", exception)
         None
-      }
     }
   }
 

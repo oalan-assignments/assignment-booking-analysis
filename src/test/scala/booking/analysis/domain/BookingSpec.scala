@@ -6,11 +6,11 @@ import org.scalatest.matchers.should._
 
 class BookingSpec extends AnyFlatSpec with Matchers  {
 
-  val confirmedKlmFlight = Booking("2019-03-17T13:47:40.317Z", Seq.empty, Seq(
+  private val confirmedKlmFlight = Booking("2019-03-17T13:47:40.317Z", Seq.empty, Seq(
     Flight("CONFIRMED", "KL", "AMS", "DXB", "2019-03-17T17:10:00Z", "2019-03-18T02:55:00Z"),
     Flight("CONFIRMED", "DL", "DXB", "AMS", "2019-03-29T01:55:00Z", "2019-03-29T06:20:00Z")))
 
-  val unconfirmedNonKlmFlight = Booking("2019-03-17T13:47:25.974Z", Seq.empty, Seq(
+  private val unconfirmedNonKlmFlight = Booking("2019-03-17T13:47:25.974Z", Seq.empty, Seq(
     Flight("CONFIRMED", "AF", "CDG", "BUD", "2019-03-14T20:55:00Z", "2019-03-14T23:05:00Z"),
     Flight("CANCELLED", "AF", "BUD", "CDG", "2019-03-17T16:25:00Z", "2019-03-17T18:45:00Z")))
 
@@ -21,10 +21,10 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
     val flights = booking.flights
     booking.timestamp shouldBe "2019-03-17T13:47:26.005Z"
     passengers.size shouldBe 1
-    passengers(0).age shouldBe Some(18)
-    passengers(0).uci shouldBe "20062C080003A785"
-    passengers(0).category shouldBe "ADT"
-    passengers(0).weight shouldBe 22
+    passengers.head.age shouldBe Some(18)
+    passengers.head.uci shouldBe "20062C080003A785"
+    passengers.head.category shouldBe "ADT"
+    passengers.head.weight shouldBe 22
     flights.size shouldBe 4
     val lastFlight = flights(3)
     lastFlight.airline shouldBe "AF"
@@ -39,7 +39,7 @@ class BookingSpec extends AnyFlatSpec with Matchers  {
     val jsonWithoutAgeInformation = os.read(os.pwd/"src"/"test"/"resources"/"event-without-age.json")
     val booking = Booking.fromJson(jsonWithoutAgeInformation).get
     booking.passengers.size shouldBe 8
-    booking.passengers(0).age shouldBe None
+    booking.passengers.head.age shouldBe None
   }
 
   "Booking json with missing mandatory lines" should "be processed but should yield empty Booking" in {

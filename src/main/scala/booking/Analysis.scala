@@ -11,7 +11,7 @@ import org.apache.spark.sql.SparkSession
 
 object Analysis {
 
-  val logger = Logger.getLogger(Analysis.getClass)
+  private val logger = Logger.getLogger(Analysis.getClass)
 
   //    val base = s"${System.getProperty("user.home")}/dev/assignment-booking-analysis/data"
   //    val bookingsPath = s"$base/bookings/booking.json"
@@ -27,7 +27,7 @@ object Analysis {
     require(!bookingsPath.isEmpty, "Bookings data path should be provided")
     require(!airportsFile.isEmpty, "Airports data file path should be provided")
 
-    val startUtc: String = LocalDate.parse(start).atStartOfDay(ZoneId.of("UTC")).toInstant().toString
+    val startUtc: String = LocalDate.parse(start).atStartOfDay(ZoneId.of("UTC")).toInstant.toString
     val endUtc: String = LocalDate.parse(end).atTime(23, 59, 59).atZone(ZoneId.of("UTC")).toString
 
     val spark = SparkSession.builder
@@ -46,7 +46,7 @@ object Analysis {
     val bookings = Bookings.load(spark, bookingsPath)
     val eligibleBookings = eligibleForAnalysis(bookings, startUtc, endUtc, broadcastAirportsToCountry.value)
     val report = Report.run(spark, eligibleBookings, broadcastAirportsToCountry, broadcastAirportsToTimezone)
-    report.show(report.count().toInt, false)
+    report.show(report.count().toInt, truncate = false)
     spark.stop()
   }
 }

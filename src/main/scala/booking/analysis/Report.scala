@@ -13,7 +13,7 @@ object Report {
           eligibleBookings: Dataset[Booking],
           broadcastAirportsToCountry: Broadcast[Map[String, String]],
           broadcastAirportsToTimezone: Broadcast[Map[String, String]]
-         ) = {
+         ): Dataset[ReportRow] = {
     val flattenedFlights = flattenFlights(spark, eligibleBookings, broadcastAirportsToCountry.value)
     val analysisSet = toAnalysisDataSet(
       spark,
@@ -26,7 +26,7 @@ object Report {
 
   case class FlightWithPassengersData(flight: Flight, passengers: Seq[Passenger])
 
-  def flattenFlights(spark: SparkSession, bookings: Dataset[Booking], airportsToCountry: Map[String, String]) = {
+  def flattenFlights(spark: SparkSession, bookings: Dataset[Booking], airportsToCountry: Map[String, String]): Dataset[FlightWithPassengersData] = {
     import spark.implicits._
     bookings.flatMap(b => {
       val expanded = b.flights.filter(f => Booking.isKlmFlightOriginatingFromNetherlands(f, airportsToCountry))
@@ -80,7 +80,7 @@ object Report {
         d1.noOfPassengers + d2.noOfPassengers
       ))
       .map(pair => analysisToReportRow(pair))
-      .sortBy(_.noOfPassengers, false)
+      .sortBy(_.noOfPassengers, ascending = false)
       .toDS()
   }
 
@@ -101,16 +101,16 @@ object Report {
       "Summer", "Summer", "Fall", "Fall", "Winter", "Winter")
     val instant = Instant
       .parse(flight.departureDate)
-      .atZone(ZoneId.of(airportsToTimezone.get(flight.origin).getOrElse("UTC")))
+      .atZone(ZoneId.of(airportsToTimezone.getOrElse(flight.origin, "UTC")))
     val season = seasons(instant.getMonthValue - 1)
-    val weekday = instant.getDayOfWeek().toString
-    AnalysisKey(airportsToCountry.get(flight.destination).getOrElse("Unknown"), season, weekday)
+    val weekday = instant.getDayOfWeek.toString
+    AnalysisKey(airportsToCountry.getOrElse(flight.destination, "Unknown"), season, weekday)
   }
 
   private[analysis] def passengersToAnalysisData(uniquePassengers: Seq[Passenger]): AnalysisData = {
     val noOfPassengers = uniquePassengers.size
-    val adults = uniquePassengers.filter(_.category == "ADT").size
-    val children = uniquePassengers.filter(_.category == "CHD").size
+    val adults = uniquePassengers.count(_.category == "ADT")
+    val children = uniquePassengers.count(_.category == "CHD")
     val totalWeight = uniquePassengers.map(_.weight).sum
     val definedAges = uniquePassengers.filter(_.age.isDefined)
     val ageSum = definedAges.map(_.age.get).sum

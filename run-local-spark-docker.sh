@@ -11,5 +11,5 @@ echo "Directory for bookings: $BOOKINGS_DIR"
               --name "booking-analysis" \
               --master "local[4]" \
               target/scala-2.12/booking-analysis-0.1.jar \
-              $START_DATE $END_DATE $BOOKINGS_DIR data/airports/airports.dat
+              "$START_DATE" "$END_DATE" "$BOOKINGS_DIR" data/airports/airports.dat
 echo "Completed!"
