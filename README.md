@@ -84,16 +84,14 @@ If there is an intention to run the code in a cluster (e.g. YARN), scripts shoul
 * I used `destinationAirport` information only. I noticed in some bookings destination is just a connection and most probably many flights originating from the Netherlands has a final destination. I looked at `yieldTripDestination` and `yieldDestination` but could not find a consistent pattern in the dataset. Also I did not want to make more than one assumption. Therefore, current code use `destinationAirport` info of flight leg rather than the final destination.
 
 
-### Data Investigation
-
-#### Design
+### Design
 
 Code is organised in packages as:
 * `domain`: contains `Booking` class to contain `Booking` case class and methods for
-    * parses a booking (json line) partially (only necessary fields)
+    * parsing a booking (json line) partially (only necessary fields)
     * performing several checks on bookings, used for filtering data
 * `input`: contains:
-    * `Airports`: loads airports data (by filtering records with null fields that we intent to use) and convert it to a lookup (airport -> country and airport -> timezone) which is later broadcasted
+    * `Airports`: loads airports data by filtering out records with null fields (that we intent to use) and convert it to a lookup (airport -> country and airport -> timezone) which is later broadcasted
     * `Bookings`: loads bookings data by parsing json (and filtering our invalid entries), also provides a method to filter bookings which are eligible for analysis (bookings that contain any KLM flight originating from the Netherlands in the given period)
 * `analysis`: contains `Report` object applies following transformations to reach a report:
     * `flattenFlighs`: a flatMap on bookings so a booking that contains more than 1 eligible KLM flight converted into many records (`FlightWithPassengersData`)
@@ -102,8 +100,8 @@ Code is organised in packages as:
 
 #### Design Choices
 
-* Used `Spark` which suited the task since it is batch-first use case. In case, there is a desire to use streaming data `Spark`'s Streaming API could be used with little change.
-* Used mostly `DataSet` api to utilise case classes and methods on them to filter/transform. It yields to a code that promotes FP (in contrast to declarative sql api), that provides type safety to some degree. Finally give room for out of the box optimizations (via Tungsten and Catalyst)
+* Used `Spark`, which suited the task since it is batch-first use case. In case, there is a desire to use streaming data, `Spark`'s Streaming API could be used with little change.
+* Used mostly `DataSet` api to utilise case classes and methods on them to filter/transform. It promotes FP (in contrast to declarative sql api), and provides type safety to some degree. Finally, give room for out of the box optimizations (via Tungsten and Catalyst)
 * Used `upickle` and did selective/partial parsing of booking records. It gave more control for error handling in contrast to using Spark's json reading capability (which has also some invalid record handling but harder to control). Also this approach (due to partial parsing) yielded to a narrow/simpler case class (`Booking`)
 * Airports are loaded into a lookup (`map`) and broadcasted to workers since the resulting data is pretty small and static (will not grow much further)
 * Used [docker base image](https://github.com/big-data-europe/docker-spark) to provide a self-contained environment to run without dealing with dependencies (particularly spark), however sbt compilation is very slow in the container, so that has to be done locally unfortunately.
@@ -124,6 +122,6 @@ If I could make more time, I would implement:
 Things to consider, if this code will be evolved into a production system:
 * Job could be broken into two steps (filtering and producing the report) by using Airflow/Luigi to avoid a monolithic job. That way failed steps could be retried and also it would be easier to maintain the job
 * After filtering data intermediate result could be written in `parquet` format (considering columnar format suits querying better) or if there is an intention to perform adhoc queries and make reports, ingesting into a database would be a good idea.
-* Monitoring/Metrics/Alerts for the job, input validations. I implemented some invalid data handling in json parsing. Using similar pattern (using Try/Success/Failure) and logging (or persisting) invalid records could be implemented.
-* Providing an initial load routine (for retrospective data and in case of undetected failures)
+* Monitoring/Metrics/Alerts for the job, input validations. I implemented some invalid data handling in json parsing. Using similar pattern (Try/Success/Failure -> Some/None) and logging (or persisting) invalid records could be implemented.
+* Providing an initial load routine (for retrospective data loading or for undetected failures)
 * Retention of data (particularly PII) and cleaning up has to be discussed and designed
