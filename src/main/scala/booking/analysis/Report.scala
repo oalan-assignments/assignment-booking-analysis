@@ -4,7 +4,6 @@ import java.time.{Instant, ZoneId}
 
 import booking.analysis.domain.Booking
 import booking.analysis.domain.Booking.{Flight, Passenger}
-import booking.analysis.input.Bookings.{AnalysisData, AnalysisKey}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
 
@@ -57,6 +56,15 @@ object Report {
                        children: Int,
                        avgWeight: Double,
                        avgAge: Option[Double])
+
+  case class AnalysisData(noOfPassengers: Int,
+                          adults: Int,
+                          children: Int,
+                          totalWeight: Int,
+                          ageSum: Int,
+                          noOfPassengersWithAgeInfo: Int)
+
+  case class AnalysisKey(country: String, season: String, weekday: String)
 
   def aggregateToFinalReport(spark: SparkSession,
                              analysisSet: Dataset[(AnalysisKey, AnalysisData)]): Dataset[ReportRow] = {

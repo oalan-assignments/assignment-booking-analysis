@@ -1,8 +1,7 @@
 package booking.analysis
 
-import booking.analysis.Report.{ReportRow, analysisToReportRow, flightToAnalysisKey, passengersToAnalysisData}
+import booking.analysis.Report.{AnalysisData, AnalysisKey, ReportRow, analysisToReportRow, flightToAnalysisKey, passengersToAnalysisData}
 import booking.analysis.domain.Booking.{Flight, Passenger}
-import booking.analysis.input.Bookings._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
